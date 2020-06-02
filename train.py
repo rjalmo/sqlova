@@ -142,6 +142,13 @@ def get_electra(ELECTRA_PT_PATH, electra_type, do_lower_case, no_pretraining):
 
     return model_electra, tokenizer, electra_config
 
+def get_albert(name="albert-base-v2"):
+    # FIXME: https://huggingface.co/albert-base-v2
+    tokenizer_albert = AutoTokenizer.from_pretrained(name)
+    model_albert = AutoModel.from_pretrained(name)
+    config_albert = AutoConfig.from_pretrained(name)
+    model_albert.to(device)
+    return model_albert, tokenizer_albert, config_albert
 
 def get_opt(model, model_bert, fine_tune):
     if fine_tune:
@@ -173,8 +180,11 @@ def get_models(args, BERT_PT_PATH, trained=False, path_model_bert=None, path_mod
     #                                               args.no_pretraining)
 
     # Get ELECTRA
-    model_bert, tokenizer, bert_config = get_electra(BERT_PT_PATH, args.bert_type, args.do_lower_case,
-                                                  args.no_pretraining)
+    # model_bert, tokenizer, bert_config = get_electra(BERT_PT_PATH, args.bert_type, args.do_lower_case,
+    #                                               args.no_pretraining)
+
+    # Get ALBERT
+    model_bert, tokenizer, bert_config = get_albert()
 
     args.iS = bert_config.hidden_size * args.num_target_layers  # Seq-to-SQL input vector dimenstion
 
