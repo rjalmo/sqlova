@@ -5,23 +5,20 @@
 # Sep30, 2018
 
 
-import os, sys, argparse, re, json
-
-from matplotlib.pylab import *
-import torch.nn as nn
-import torch
-import torch.nn.functional as F
+import argparse
 import random as python_random
-# import torchvision.datasets as dsets
+
+# ELECTRA
+from transformers import AutoTokenizer, ElectraConfig, ElectraModel, AutoModel, AutoConfig
 
 # BERT
 import bert.tokenization as tokenization
 from bert.modeling import BertConfig, BertModel
-
-from sqlova.utils.utils_wikisql import *
-from sqlova.utils.utils import load_jsonl
-from sqlova.model.nl2sql.wikisql_models import *
 from sqlnet.dbengine import DBEngine
+from sqlova.model.nl2sql.wikisql_models import *
+from sqlova.utils.utils import load_jsonl
+
+# import torchvision.datasets as dsets
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -46,6 +43,7 @@ def construct_hyper_param(parser):
     parser.add_argument("--model_type", default='Seq2SQL_v1', type=str,
                         help="Type of model.")
 
+    # FIXME: ELECTRA params
     # 1.2 BERT Parameters
     parser.add_argument("--vocab_file",
                         default='vocab.txt', type=str,
@@ -134,6 +132,17 @@ def get_bert(BERT_PT_PATH, bert_type, do_lower_case, no_pretraining):
     return model_bert, tokenizer, bert_config
 
 
+def get_electra(ELECTRA_PT_PATH, electra_type, do_lower_case, no_pretraining):
+    # FIXME: https://huggingface.co/google/electra-base-discriminator
+    tokenizer = AutoTokenizer.from_pretrained("google/electra-base-discriminator")
+    model_electra = AutoModel.from_pretrained("google/electra-base-discriminator")
+    electra_config = AutoConfig.from_pretrained("google/electra-base-discriminator")
+
+    model_electra.to(device)
+
+    return model_electra, tokenizer, electra_config
+
+
 def get_opt(model, model_bert, fine_tune):
     if fine_tune:
         opt = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()),
@@ -160,8 +169,13 @@ def get_models(args, BERT_PT_PATH, trained=False, path_model_bert=None, path_mod
     print(f"Fine-tune BERT: {args.fine_tune}")
 
     # Get BERT
-    model_bert, tokenizer, bert_config = get_bert(BERT_PT_PATH, args.bert_type, args.do_lower_case,
+    # model_bert, tokenizer, bert_config = get_bert(BERT_PT_PATH, args.bert_type, args.do_lower_case,
+    #                                               args.no_pretraining)
+
+    # Get ELECTRA
+    model_bert, tokenizer, bert_config = get_electra(BERT_PT_PATH, args.bert_type, args.do_lower_case,
                                                   args.no_pretraining)
+
     args.iS = bert_config.hidden_size * args.num_target_layers  # Seq-to-SQL input vector dimenstion
 
     # Get Seq-to-SQL
