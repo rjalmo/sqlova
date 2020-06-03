@@ -31,7 +31,7 @@ def construct_hyper_param(parser):
     parser.add_argument("--trained", default=False, action='store_true')
 
     parser.add_argument('--tepoch', default=200, type=int)
-    parser.add_argument("--bS", default=32, type=int,
+    parser.add_argument("--bS", default=12, type=int,
                         help="Batch size")
     parser.add_argument("--accumulate_gradients", default=2, type=int,
                         help="The number of accumulation of backpropagation to effectivly increase the batch size.")
@@ -43,9 +43,9 @@ def construct_hyper_param(parser):
     parser.add_argument("--model_type", default='Seq2SQL_v1', type=str,
                         help="Type of model.")
 
-    parser.add_argument('--toy_model', action='store_true', help='Use small toy model for experiment')
+    parser.add_argument('--toy_model', default=False, action='store_true', help='Use small toy model for experiment')
 
-    parser.add_argument("--lm_type", default='bert', type=str,
+    parser.add_argument("--lm_type", default='albert', type=str,
                         help="Type of language model to load. e.g.) bert, albert, electra")
 
     # 1.2 BERT Parameters

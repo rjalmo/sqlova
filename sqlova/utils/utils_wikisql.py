@@ -754,7 +754,7 @@ def get_bert_output(model_bert, tokenizer, nlu_t, hds, max_seq_length):
         all_encoder_layer, pooled_output = output
     elif isinstance(model_bert, AlbertModel):
         # FIXME: produce num_hidden_layers from arg, not hardcoded
-        all_encoder_layer = [output[0]] * 12
+        all_encoder_layer = [output[0]]
         pooled_output = output[1]
     elif isinstance(model_bert, ElectraModel):
         # FIXME: TODO
@@ -787,7 +787,8 @@ def get_wemb_n(i_nlu, l_n, hS, num_hidden_layers, all_encoder_layer, num_out_lay
             i_layer = num_hidden_layers - 1 - i_noln
             st = i_noln * hS
             ed = (i_noln + 1) * hS
-            wemb_n[b, 0:(i_nlu1[1] - i_nlu1[0]), st:ed] = all_encoder_layer[i_layer][b, i_nlu1[0]:i_nlu1[1], :]
+            i_adj = i_layer if i_layer < len(all_encoder_layer) else 0  # albert model will use 0
+            wemb_n[b, 0:(i_nlu1[1] - i_nlu1[0]), st:ed] = all_encoder_layer[i_adj][b, i_nlu1[0]:i_nlu1[1], :]
     return wemb_n
     #
 
@@ -813,8 +814,9 @@ def get_wemb_h(i_hds, l_hpu, l_hs, hS, num_hidden_layers, all_encoder_layer, num
                 i_layer = num_hidden_layers - 1 - i_nolh
                 st = i_nolh * hS
                 ed = (i_nolh + 1) * hS
+                i_adj = i_layer if i_layer < len(all_encoder_layer) else 0  # albert model will use 0
                 wemb_h[b_pu, 0:(i_hds11[1] - i_hds11[0]), st:ed] \
-                    = all_encoder_layer[i_layer][b, i_hds11[0]:i_hds11[1],:]
+                    = all_encoder_layer[i_adj][b, i_hds11[0]:i_hds11[1],:]
 
 
     return wemb_h
