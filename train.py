@@ -43,6 +43,11 @@ def construct_hyper_param(parser):
     parser.add_argument("--model_type", default='Seq2SQL_v1', type=str,
                         help="Type of model.")
 
+    parser.add_argument('--toy_model', action='store_true', help='Use small toy model for experiment')
+
+    parser.add_argument("--lm_type", default='bert', type=str,
+                        help="Type of language model to load. e.g.) bert, albert, electra")
+
     # FIXME: ELECTRA params
     # 1.2 BERT Parameters
     parser.add_argument("--vocab_file",
@@ -104,8 +109,6 @@ def construct_hyper_param(parser):
     if torch.cuda.is_available():
         torch.cuda.manual_seed_all(args.seed)
 
-    # args.toy_model = not torch.cuda.is_available()
-    args.toy_model = False
     args.toy_size = 12
 
     return args
@@ -132,23 +135,26 @@ def get_bert(BERT_PT_PATH, bert_type, do_lower_case, no_pretraining):
     return model_bert, tokenizer, bert_config
 
 
-def get_electra(ELECTRA_PT_PATH, electra_type, do_lower_case, no_pretraining):
-    # FIXME: https://huggingface.co/google/electra-base-discriminator
-    tokenizer = AutoTokenizer.from_pretrained("google/electra-base-discriminator")
-    model_electra = AutoModel.from_pretrained("google/electra-base-discriminator")
-    electra_config = AutoConfig.from_pretrained("google/electra-base-discriminator")
+def get_hf_lm(name="albert-base-v2"):
+    # https://huggingface.co/google/electra-base-discriminator
+    # https://huggingface.co/albert-base-v2
 
-    model_electra.to(device)
-
-    return model_electra, tokenizer, electra_config
-
-def get_albert(name="albert-base-v2"):
-    # FIXME: https://huggingface.co/albert-base-v2
     tokenizer_albert = AutoTokenizer.from_pretrained(name)
     model_albert = AutoModel.from_pretrained(name)
     config_albert = AutoConfig.from_pretrained(name)
     model_albert.to(device)
     return model_albert, tokenizer_albert, config_albert
+
+
+def get_lm(bert_pt_path=None):
+    t = args.lm_type
+    if t == 'bert':
+        return get_bert(bert_pt_path, args.bert_type, args.do_lower_case, args.no_pretraining)
+    elif t == 'albert':
+        return get_hf_lm('albert-base-v2')
+    elif t == 'electra':
+        return get_hf_lm('google/electra-base-discriminator')
+
 
 def get_opt(model, model_bert, fine_tune):
     if fine_tune:
@@ -175,16 +181,8 @@ def get_models(args, BERT_PT_PATH, trained=False, path_model_bert=None, path_mod
     print(f"learning rate: {args.lr_bert}")
     print(f"Fine-tune BERT: {args.fine_tune}")
 
-    # Get BERT
-    # model_bert, tokenizer, bert_config = get_bert(BERT_PT_PATH, args.bert_type, args.do_lower_case,
-    #                                               args.no_pretraining)
-
-    # Get ELECTRA
-    # model_bert, tokenizer, bert_config = get_electra(BERT_PT_PATH, args.bert_type, args.do_lower_case,
-    #                                               args.no_pretraining)
-
-    # Get ALBERT
-    model_bert, tokenizer, bert_config = get_albert()
+    # Get Language Model
+    model_bert, tokenizer, bert_config = get_lm(BERT_PT_PATH)
 
     args.iS = bert_config.hidden_size * args.num_target_layers  # Seq-to-SQL input vector dimenstion
 
