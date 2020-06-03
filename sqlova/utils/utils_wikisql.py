@@ -13,8 +13,9 @@ import torch
 import torchvision.datasets as dsets
 import torch.nn as nn
 import torch.nn.functional as F
+from transformers import AlbertModel, ElectraModel
 
-
+from bert.modeling import BertModel
 from .utils import generate_perm_inv
 from .utils import json_default_type_checker
 
@@ -748,7 +749,18 @@ def get_bert_output(model_bert, tokenizer, nlu_t, hds, max_seq_length):
     all_segment_ids = torch.tensor(segment_ids, dtype=torch.long).to(device)
 
     # 4. Generate BERT output.
-    all_encoder_layer, pooled_output = model_bert(all_input_ids, all_segment_ids, all_input_mask)
+    output = model_bert(all_input_ids, all_segment_ids, all_input_mask)
+    if isinstance(model_bert, BertModel):
+        all_encoder_layer, pooled_output = output
+    elif isinstance(model_bert, AlbertModel):
+        # FIXME: produce num_hidden_layers from arg, not hardcoded
+        all_encoder_layer = [output[0]] * 12
+        pooled_output = output[1]
+    elif isinstance(model_bert, ElectraModel):
+        # FIXME: TODO
+        pass
+    else:
+        all_encoder_layer, pooled_output = output
 
     # 5. generate l_hpu from i_hds
     l_hpu = gen_l_hpu(i_hds)

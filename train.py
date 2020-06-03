@@ -48,7 +48,6 @@ def construct_hyper_param(parser):
     parser.add_argument("--lm_type", default='bert', type=str,
                         help="Type of language model to load. e.g.) bert, albert, electra")
 
-    # FIXME: ELECTRA params
     # 1.2 BERT Parameters
     parser.add_argument("--vocab_file",
                         default='vocab.txt', type=str,
