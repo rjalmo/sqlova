@@ -731,9 +731,15 @@ def get_bert_output(model_bert, tokenizer, nlu_t, hds, max_seq_length):
             input_mask1.append(0)
             segment_ids1.append(0)
 
-        assert len(input_ids1) == max_seq_length
-        assert len(input_mask1) == max_seq_length
-        assert len(segment_ids1) == max_seq_length
+        if len(input_ids1) != max_seq_length or len(input_mask1) != max_seq_length or len(segment_ids1) != max_seq_length:
+            print("Wrong lengths:")
+            print("input_ids1: " + str(len(input_ids1)))
+            print("input_mask1: " + str(len(input_mask1)))
+            print("segment_ids1: " + str(len(segment_ids1)))
+            print("b: " + str(b))
+            print("nlu_t: " + str(nlu_t))
+            print("nlu_t1: " + str(nlu_t1))
+            exit(1)
 
         input_ids.append(input_ids1)
         tokens.append(tokens1)

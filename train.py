@@ -53,7 +53,7 @@ def construct_hyper_param(parser):
                         default='vocab.txt', type=str,
                         help="The vocabulary file that the BERT model was trained on.")
     parser.add_argument("--max_seq_length",
-                        default=222, type=int,  # Set based on maximum length of input tokens.
+                        default=300, type=int,  # Set based on maximum length of input tokens.
                         help="The maximum total input sequence length after WordPiece tokenization. Sequences "
                              "longer than this will be truncated, and sequences shorter than this will be padded.")
     parser.add_argument("--num_target_layers",
