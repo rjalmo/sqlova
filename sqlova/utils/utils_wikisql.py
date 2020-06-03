@@ -737,8 +737,8 @@ def get_bert_output(model_bert, tokenizer, nlu_t, hds, max_seq_length):
             print("input_mask1: " + str(len(input_mask1)))
             print("segment_ids1: " + str(len(segment_ids1)))
             print("b: " + str(b))
-            print("nlu_t: " + str(nlu_t))
-            print("nlu_t1: " + str(nlu_t1))
+            # print("nlu_t: " + str(nlu_t))
+            # print("nlu_t1: " + str(nlu_t1))
             input_ids1 = input_ids1[:max_seq_length]
             input_mask1 = input_mask1[:max_seq_length]
             segment_ids1 = segment_ids1[:max_seq_length]
