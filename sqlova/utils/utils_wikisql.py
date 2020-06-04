@@ -758,15 +758,16 @@ def get_bert_output(model_bert, tokenizer, nlu_t, hds, max_seq_length):
 
     # 4. Generate BERT output.
     output = model_bert(all_input_ids, all_segment_ids, all_input_mask)
+
+    # all_encoder_layer should be a list of hidden_states tensor
     if isinstance(model_bert, BertModel):
         all_encoder_layer, pooled_output = output
     elif isinstance(model_bert, AlbertModel):
-        # FIXME: produce num_hidden_layers from arg, not hardcoded
         all_encoder_layer = [output[0]]
         pooled_output = output[1]
     elif isinstance(model_bert, ElectraModel):
-        # FIXME: TODO
-        pass
+        all_encoder_layer = [output[0]]
+        pooled_output = None
     else:
         all_encoder_layer, pooled_output = output
 
